@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Messagebox Example</title>
+    <style type="text/css">
+        input {
+            margin: 10px;
+            padding: 5px 8px;
+            background-color: #d1d1d1;
+            border-width: 0;
+            cursor: pointer;
+        }
+        input:active {
+            transform: scale(0.95);
+        }
+
+        .toggle {
+            display: none;
+        }
+        .toggle:checked + label .scrubber {
+            left: 20px;
+            background-color: #0d0;
+        }
+        .toggle + label .scrubber {
+            position: absolute;
+            left: 0;
+            height: 10px;
+            width: 10px;
+            background-color: #f1f1f1;
+            border: 5px solid #d1d1d1;
+            border-radius: 10px;
+            transition: left 0.2s;
+        }
+        .toggle-container {
+            position: relative;
+            display: inline-block;
+            height: 20px;
+            width: 40px;
+            background-color: #fff;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- example -->
+    <input type="button" value="Show Menu" id="menu-button">
+    <input type="button" value="Special Prompt" id="special-prompt">
+    <p id="special-content"></p>
+
+    <script type="text/javascript">
+        document.getElementById('menu-button').onclick = function () {
+            messagebox('menu', ['Some Option', 'Form', 'Settings', 'Close']);
+        };
+
+        document.getElementById('special-prompt').onclick = function () {
+            messagebox('Press the button?', ['Yes', 'No'], function (response) {
+                if (response !== 'Yes') return;
+
+                if (!specialText[specialIndex])
+                    specialIndex = 0;
+
+                specialContent.textContent += specialText[specialIndex++] + ' ';
+            });
+        };
+
+        var specialText = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
+                + 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. '
+                + 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. '
+                + 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
+                .split(/\s+/),
+            specialIndex = 0,
+            specialContent = document.getElementById('special-content');
+    </script>
+
+    <!-- templates -->
+    <div class="-messagebox-templates">
+        <!-- menu -->
+        <div data-name="menu" data-type="template">
+            <style type="text/css">
+                #messagebox-buttons > * { display: block; }
+            </style>
+        </div>
+        <div data-name="menu" data-type="callback">
+            switch (response) {
+                case 'Some Option':
+                    messagebox('some-option', ['Back to Menu', 'Close']);
+                    break;
+
+                case 'Form':
+                    messagebox('form', ['Go', 'Cancel']);
+                    break;
+
+                case 'Settings':
+                    messagebox('settings', ['Back to Menu', 'Close']);
+                    break;
+            }
+        </div>
+
+        <!-- some option -->
+        <div data-name="some-option" data-type="template">
+            <h3>Here is the option you selected...</h3>
+            <p>... but that's it, there's nothing else.</p>
+        </div>
+        <div data-name="some-option" data-type="callback">
+            if (response !== 'Back to Menu') return;
+            messagebox('menu', ['Some Option', 'Form', 'Settings', 'Close']);
+        </div>
+
+        <!-- form -->
+        <form data-name="form" data-type="template">
+            <table>
+                <tr>
+                    <td>First Name</td>
+                    <td>
+                        <input type="text" name="first_name">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Last Name</td>
+                    <td>
+                        <input type="text" name="last_name">
+                    </td>
+                </tr>
+            </table>
+        </form>
+        <div data-name="form" data-type="callback">
+            var data = new FormData(content),
+                firstName = data.get('first_name'),
+                lastName  = data.get('last_name');
+
+            if (!firstName || !lastName) {
+                alert('It\'s two fields, just fill it out...');
+                messagebox('form', ['Go', 'Canel']);
+            }
+            else
+                confirm('Are you really "' + firstName + ' ' + lastName + '"...');
+        </div>
+
+        <!-- settings -->
+        <div data-name="settings" data-type="template">
+            <p>Enable advanced machine learning features</p>
+            <div class="toggle-container">
+                <input type="checkbox" id="track-toggle" class="toggle" checked>
+                <label for="track-toggle">
+                    <div class="scrubber"></div>
+                </label>
+            </div>
+        </div>
+        <div data-name="settings" data-type="callback">
+            if (response !== 'Back to Menu') return;
+            messagebox('menu', ['Some Option', 'Form', 'Settings', 'Close']);
+        </div>
+    </div>
+
+    <!-- messagebox -->
+    <link rel="stylesheet" href="./style/messagebox.css">
+    <div id="messagebox-mask">
+        <div id="messagebox-container">
+            <div id="messagebox-content"></div>
+            <div id="messagebox-buttons"></div>
+        </div>
+    </div>
+    <script type="text/javascript" src="./src/messagebox.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+#messagebox-mask {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(225, 225, 225, 0.1);
+  z-index: 100;
+  text-align: center;
+  line-height: 100vh;
+}
+
+#messagebox-mask.show {
+  display: unset;
+}
+
+#messagebox-container {
+  position: relative;
+  display: inline-block;
+  min-width: 300px;
+  max-width: 90%;
+  max-height: 90%;
+  background-color: #f1f1f1;
+  box-shadow: 1px 1px 5px #999;
+  border-radius: 5px;
+  overflow-y: auto;
+  vertical-align: middle;
+  line-height: initial;
+}
+
+#messagebox-content, #messagebox-buttons {
+  padding: 10px;
+}
+
+#messagebox-buttons {
+  text-align: center;
+}
+
+.-messagebox-templates {
+  display: none;
+}
+
+/*# sourceMappingURL=messagebox.css.map */
