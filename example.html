@@ -13,6 +13,9 @@
             border-width: 0;
             cursor: pointer;
         }
+        input[type=text] {
+            cursor: text;
+        }
         input:active {
             transform: scale(0.95);
         }
@@ -50,72 +53,29 @@
     <input type="button" value="Special Prompt" id="special-prompt">
     <p id="special-content"></p>
 
-    <script type="text/javascript">
-        document.getElementById('menu-button').onclick = function () {
-            messagebox('menu', ['Some Option', 'Form', 'Settings', 'Close']);
-        };
-
-        document.getElementById('special-prompt').onclick = function () {
-            messagebox('Press the button?', ['Yes', 'No'], function (response) {
-                if (response !== 'Yes') return;
-
-                if (!specialText[specialIndex])
-                    specialIndex = 0;
-
-                specialContent.textContent += specialText[specialIndex++] + ' ';
-            });
-        };
-
-        var specialText = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
-                + 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. '
-                + 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. '
-                + 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
-                .split(/\s+/),
-            specialIndex = 0,
-            specialContent = document.getElementById('special-content');
-    </script>
-
     <!-- templates -->
     <div class="-messagebox-templates">
         <!-- menu -->
-        <div data-name="menu" data-type="template">
+        <div data-name="menu">
             <style type="text/css">
+                /* let's make the buttons stack vertically */
                 #messagebox-buttons > * { display: block; }
             </style>
         </div>
-        <div data-name="menu" data-type="callback">
-            switch (response) {
-                case 'Some Option':
-                    messagebox('some-option', ['Back to Menu', 'Close']);
-                    break;
-
-                case 'Form':
-                    messagebox('form', ['Go', 'Cancel']);
-                    break;
-
-                case 'Settings':
-                    messagebox('settings', ['Back to Menu', 'Close']);
-                    break;
-            }
-        </div>
 
         <!-- some option -->
-        <div data-name="some-option" data-type="template">
+        <div data-name="some-option">
             <h3>Here is the option you selected...</h3>
             <p>... but that's it, there's nothing else.</p>
         </div>
-        <div data-name="some-option" data-type="callback">
-            if (response !== 'Back to Menu') return;
-            messagebox('menu', ['Some Option', 'Form', 'Settings', 'Close']);
-        </div>
 
         <!-- form -->
-        <form data-name="form" data-type="template">
+        <form data-name="form">
             <table>
                 <tr>
                     <td>First Name</td>
                     <td>
-                        <input type="text" name="first_name">
+                        <input type="text" name="first_name" data-autofocus>
                     </td>
                 </tr>
                 <tr>
@@ -126,21 +86,9 @@
                 </tr>
             </table>
         </form>
-        <div data-name="form" data-type="callback">
-            var data = new FormData(content),
-                firstName = data.get('first_name'),
-                lastName  = data.get('last_name');
-
-            if (!firstName || !lastName) {
-                alert('It\'s two fields, just fill it out...');
-                messagebox('form', ['Go', 'Canel']);
-            }
-            else
-                confirm('Are you really "' + firstName + ' ' + lastName + '"...');
-        </div>
 
         <!-- settings -->
-        <div data-name="settings" data-type="template">
+        <div data-name="settings">
             <p>Enable advanced machine learning features</p>
             <div class="toggle-container">
                 <input type="checkbox" id="track-toggle" class="toggle" checked>
@@ -148,10 +96,6 @@
                     <div class="scrubber"></div>
                 </label>
             </div>
-        </div>
-        <div data-name="settings" data-type="callback">
-            if (response !== 'Back to Menu') return;
-            messagebox('menu', ['Some Option', 'Form', 'Settings', 'Close']);
         </div>
     </div>
 
@@ -164,5 +108,115 @@
         </div>
     </div>
     <script type="text/javascript" src="./src/messagebox.js"></script>
+
+    <!-- script -->
+    <script type="text/javascript">
+        /**
+         * Here is where we implement our site's functionality
+         * by wrapping specific calls to the messagebox library.
+         * A reusable interface like this allows reliable navigation
+         * between messagebox content.
+         */
+        const example = {};
+
+        example.showMenu = function () {
+            messagebox('menu', [
+                'Some Option',
+                'Form',
+                'Settings',
+                'Close'
+            ], response => {
+                switch (response) {
+                    case 'Some Option':
+                        this.showSomeOption();
+                        break;
+
+                    case 'Form':
+                        this.showForm();
+                        break;
+
+                    case 'Settings':
+                        this.showSettings();
+                        break;
+                }
+            });
+        };
+
+        example.showSomeOption = function () {
+            messagebox('some-option', [
+                'Back to Menu',
+                'Close'
+            ], response => {
+                if (response === 'Back to Menu')
+                    this.showMenu();
+            });
+        };
+
+        example.showForm = function () {
+            messagebox('form', [
+                'Go',
+                'Cancel'
+            ], (response, content) => {
+                if (response === 'Cancel') return;
+
+                var data = new FormData(content),
+                    firstName = data.get('first_name'),
+                    lastName = data.get('last_name');
+
+                if (!firstName || !lastName) {
+                    alert('It\'s two fields, just fill it out...');
+
+                    this.showForm();
+                }
+                else {
+                    confirm(`Are you really "${firstName} ${lastName}"...`);
+
+                    content.reset()
+                }
+            });
+        };
+
+        example.showSettings = function () {
+            messagebox('settings', [
+                'Back to Menu',
+                'Close'
+            ], response => {
+                if (response === 'Back to Menu')
+                    this.showMenu();
+            });
+        };
+
+        example.specialText = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
+                + 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. '
+                + 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. '
+                + 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
+                .split(/\s+/);
+        example.specialIndex = 0;
+        example.specialContent = document.getElementById('special-content');
+
+        example.showSpecialPrompt = function () {
+            messagebox('Press the buttons?', [
+                'Yes',
+                'No'
+            ], response => {
+                if (response !== 'Yes') return;
+
+                if (!this.specialText[this.specialIndex])
+                    this.specialIndex = 0;
+
+                this.specialContent.textContent += this.specialText[this.specialIndex++] + ' ';
+            });
+        };
+
+        //
+
+        document.getElementById('menu-button').onclick = function () {
+            example.showMenu();
+        };
+
+        document.getElementById('special-prompt').onclick = function() {
+            example.showSpecialPrompt();
+        };
+    </script>
 </body>
 </html>

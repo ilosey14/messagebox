@@ -121,37 +121,17 @@ messagebox.close = function () {
 
 // load in templates
 (function () {
-    var templateDOM = document.getElementsByClassName('-messagebox-templates'),
-        templateList = {};
+    var templateDOM = document.getElementsByClassName('-messagebox-templates');
 
-    // read all templates and callbacks into list
+    // read all templates into list
     while (templateDOM.length) {
         let templates = templateDOM[0];
 
         for (let template of templates.children) {
-            let name = template.dataset.name,
-                type = template.dataset.type || 'template';
-
-            if (!templateList[name])
-                templateList[name] = {};
-
-            if (type === 'template')
-                templateList[name][type] = template;
-            else if (type === 'callback') {
-                try {
-                    templateList[name][type] = new Function('response', 'content', '"use strict";' + template.innerHTML.trim());
-                }
-                catch (err) {
-                    console.error('Messagebox Template Error: syntax error in "' + name + ':callback"');
-                    continue;
-                }
-            }
+            let name = template.dataset.name;
+            messagebox.add(name, template);
         }
 
         templates.parentElement.removeChild(templates);
     }
-
-    // add templates to messagebox
-    for (let name in templateList)
-        messagebox.add(name, templateList[name]['template'], templateList[name]['callback']);
 })();
