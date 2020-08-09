@@ -61,7 +61,7 @@ messagebox(
 ) => void
 ```
 
-See the example file for more detailed implementation and a live demo.
+See the `example.html` for a more detailed implementation and a live demo.
 
 For commonly used content, templates can be defined before the `messagebox.js` script
 using the following container and the `data-name` attribute for each child.
@@ -72,29 +72,6 @@ using the following container and the `data-name` attribute for each child.
     <div data-name="goodbye">Goodbye everybody!</div>
     ...
 </div>
-```
-
-For more complex functionality, both templates and callbacks can be defined
-for a given template name.
-
-```html
-<div class="-messagebox-templates">
-    <form data-name="login" data-type="template">
-        <!-- login form -->
-    </form>
-    <div data-name="login" data-type="callback">
-        if (response !== 'Login') return;
-
-        var data = new FormData(content),
-            ...
-    </div>
-</div>
-```
-
-The following will call the template with its given callback logic.
-
-```javascript
-messagebox('login', ['Submit', 'Cancel']);
 ```
 
 ## Implementation
@@ -117,7 +94,7 @@ Given the following backend
 
 as an example, the messagebox library can be included via the following page structure ...
 
-```php
+```html
 <!-- content -->
 ...
 
@@ -128,11 +105,8 @@ as an example, the messagebox library can be included via the following page str
 </div>
 
 <!-- site-wide templates -->
-<?php include_once '/templates/messagebox-templates.html'; ?>
+<?php include_once '/templates/messagebox-templates.html' ?>
 
 <!-- libraries -->
-<?php
-require_once '/libs/messagebox.html';
-require_once '/libs/some-other-api.html';
-?>
+<?php require_once '/libs/messagebox.html' ?>
 ```
