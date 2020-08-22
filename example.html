@@ -120,35 +120,17 @@
         const example = {};
 
         example.showMenu = function () {
-            messagebox('menu', [
-                'Some Option',
-                'Form',
-                'Settings',
-                'Close'
-            ], response => {
-                switch (response) {
-                    case 'Some Option':
-                        this.showSomeOption();
-                        break;
-
-                    case 'Form':
-                        this.showForm();
-                        break;
-
-                    case 'Settings':
-                        this.showSettings();
-                        break;
-                }
+            messagebox('menu', {
+                'Some Option': () => this.showSomeOption(),
+                'Form': () => this.showForm(),
+                'Settings': () => this.showSettings()
             });
         };
 
         example.showSomeOption = function () {
-            messagebox('some-option', [
-                'Back to Menu',
-                'Close'
-            ], response => {
-                if (response === 'Back to Menu')
-                    this.showMenu();
+            messagebox('some-option', {
+                'Back to Menu': () => this.showMenu(),
+                'Close': null
             });
         };
 
@@ -165,24 +147,19 @@
 
                 if (!firstName || !lastName) {
                     alert('It\'s two fields, just fill it out...');
-
                     this.showForm();
                 }
                 else {
                     confirm(`Are you really "${firstName} ${lastName}"...`);
-
                     content.reset()
                 }
             });
         };
 
         example.showSettings = function () {
-            messagebox('settings', [
-                'Back to Menu',
-                'Close'
-            ], response => {
-                if (response === 'Back to Menu')
-                    this.showMenu();
+            messagebox('settings', {
+                'Back to Menu': () => this.showMenu(),
+                'Close': null
             });
         };
 

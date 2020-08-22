@@ -1,10 +1,25 @@
 /**
- * Displays a messagebox with content and buttons
- * @param {string|HTMLElement} content Message of content to display
- * @param {string[]|string} buttons Button values
- * @param {{(response: string, content: HTMLElement) => void}} callback Handles user's response
+ * Handles user response
+ * @typedef {{(response: string, content: HTMLElement) => void}} MessasgeboxResponseCallback
+ * @callback MessasgeboxResponseCallback
+ * @param {string} response
+ * @param {HTMLElement} content
  */
-var messagebox = function (content, buttons = [], callback = null) {
+
+/**
+ * Handles user response
+ * @typedef {{(content: HTMLElement) => void}} MessageboxButtonCallback
+ * @callback MessageboxButtonCallback
+ * @param {HTMLElement} content
+ */
+
+/**
+ * Displays a messagebox with content and buttons
+ * @param {string|HTMLElement} content Message content to display or template name
+ * @param {string[]|string|Object<string, MessageboxButtonCallback>} [buttons] Button values or button value-callback pairs
+ * @param {MessasgeboxResponseCallback} [callback] Handles user's response
+ */
+var messagebox = function (content, buttons, callback) {
     if (messagebox.isOpen) {
         messagebox.clear();
         messagebox.keepOpen = true;
@@ -20,22 +35,43 @@ var messagebox = function (content, buttons = [], callback = null) {
     else if (content instanceof HTMLElement)
         messagebox.content.appendChild(content);
 
-    //buttons
-    if (!(buttons instanceof Array))
-        buttons = [ buttons ];
+    // make button value-callback object
+    var buttonCallbacks = {};
 
-    for (let value of buttons) {
+    if (typeof buttons === 'object') {
+        if (buttons instanceof Array) {
+            for (let value of buttons)
+                buttonCallbacks[value] = null
+        }
+        else
+            buttonCallbacks = buttons;
+    }
+    else if (typeof buttons === 'string')
+        buttonCallbacks[buttons] = null;
+
+    // append buttons
+    for (let value in buttonCallbacks) {
         let button = messagebox.buttons.appendChild(document.createElement('input'));
 
         button.type = 'button';
         button.value = value;
 
         button.onclick = function () {
-            if (typeof callback === 'function')
-                callback(this.value, messagebox.content.firstElementChild);
-            else if (typeof messagebox.listeners[content] === 'function')
-                messagebox.listeners[content](this.value, messagebox.content.firstElementChild);
+            var listener = messagebox.listeners[content],
+                content = messagebox.content.firstElementChild;
+                buttonCallback = buttonCallbacks[this.value];
 
+            // button callback
+            if (typeof buttonCallback === 'function')
+                buttonCallback(content);
+
+            // response callback
+            if (typeof callback === 'function')
+                callback(value, content);
+            else if (typeof listener === 'function')
+                listener(value, content);
+
+            // keep open
             if (messagebox.keepOpen)
                 messagebox.keepOpen = false;
             else
@@ -82,15 +118,29 @@ messagebox.onshow = undefined;
 messagebox.onclose = undefined;
 
 /**
- * Adds a named template and optionally an associated
- * callback to be displayed later
+ * Adds a named template and optionally an associated callback to be displayed later
  * @param {string} name Template name
- * @param {HTMLElement|string} template Template content
- * @param {{(response: string, content: HTMLElement) => void}} callback Function to invoke when a user response is given
+ * @param {HTMLElement|string} content Template content
+ * @param {{(response: string, content: HTMLElement) => void}} listener Function to invoke when a user response is given
  */
-messagebox.add = function (name, template = null, callback = null) {
-    this.templates[name] = template;
-    this.listeners[name] = callback;
+messagebox.addTemplate = function (name, content = null, listener = null) {
+    if (typeof name !== 'string')
+        throw `[messagebox] Template name must be a string, "${typeof name}" given.`;
+
+    this.templates[name] = content;
+    this.addListener(name, listener);
+};
+
+/**
+ * Adds a listener to an existing template.
+ * @param {string} name Existing template name
+ * @param {{(response: string, content: HTMLElement) => void}} listener Function to invoke when a user response is given
+ */
+messagebox.addListener = function (name, listener) {
+    if (typeof this.templates[name] === 'undefined')
+        throw `[messagebox] Cannot add listener to undefined template "${name}".`;
+
+    this.listeners[name] = listener;
 };
 
 /**
@@ -127,10 +177,8 @@ messagebox.close = function () {
     while (templateDOM.length) {
         let templates = templateDOM[0];
 
-        for (let template of templates.children) {
-            let name = template.dataset.name;
-            messagebox.add(name, template);
-        }
+        for (let template of templates.children)
+            messagebox.addTemplate(template.dataset.name, template);
 
         templates.parentElement.removeChild(templates);
     }
