@@ -1,5 +1,7 @@
 # Messagebox
 
+[documentation]: https://ilosey14.github.io/
+
 A messagebox library for sites and web apps.
 
 ---
@@ -56,9 +58,17 @@ and run the optional callback function only when one of the defined buttons is c
 ```typescript
 messagebox(
     content: string|HTMLElement,
-    buttons: string[]|string,
-    callback: (response: string, content: HTMLElement) => void
+    buttons?: string[]|string,
+    callback?: (response: string, content: HTMLElement) => void
 ) => void
+```
+or
+```typescript
+message(
+    content: string|HTMLElement,
+    buttons: {[value: string]: (content: HTMLElement) => void, ...},
+    callback?: ...
+)
 ```
 
 See the `example.html` for a more detailed implementation and a live demo.
@@ -73,6 +83,8 @@ using the following container and the `data-name` attribute for each child.
     ...
 </div>
 ```
+
+---
 
 ## Implementation
 
@@ -109,4 +121,16 @@ as an example, the messagebox library can be included via the following page str
 
 <!-- libraries -->
 <?php require_once '/libs/messagebox.html' ?>
+```
+
+---
+
+## Documentation and More
+
+Check the [docs][documentation] for everything you can do with this library.
+
+### Clone the repo
+
+```bash
+git clone https://github.com/ilosey14/messagebox.git
 ```

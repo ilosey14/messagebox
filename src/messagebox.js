@@ -15,9 +15,9 @@
 
 /**
  * Displays a messagebox with content and buttons
- * @param {string|HTMLElement} content Message content to display or template name
+ * @param {string|HTMLElement} content Message content to display or a template name
  * @param {string[]|string|Object<string, MessageboxButtonCallback>} [buttons] Button values or button value-callback pairs
- * @param {MessasgeboxResponseCallback} [callback] Handles user's response
+ * @param {MessasgeboxResponseCallback} [callback] Handles user response
  */
 var messagebox = function (content, buttons, callback) {
     if (messagebox.isOpen) {
@@ -118,23 +118,28 @@ messagebox.onshow = undefined;
 messagebox.onclose = undefined;
 
 /**
- * Adds a named template and optionally an associated callback to be displayed later
+ * Adds a named template to be displayed later.
+ *
+ * (Optional) Associate a response callback with the template.
+ * Can be overruled by the callback in the `messagebox` function.
  * @param {string} name Template name
- * @param {HTMLElement|string} content Template content
- * @param {{(response: string, content: HTMLElement) => void}} listener Function to invoke when a user response is given
+ * @param {string|HTMLElement} content Template content
+ * @param {MessasgeboxResponseCallback} [listener] Function to invoke when a user response is given
  */
-messagebox.addTemplate = function (name, content = null, listener = null) {
+messagebox.addTemplate = function (name, content, listener) {
     if (typeof name !== 'string')
         throw `[messagebox] Template name must be a string, "${typeof name}" given.`;
 
     this.templates[name] = content;
-    this.addListener(name, listener);
+
+    if (typeof listener === 'function')
+        this.addListener(name, listener);
 };
 
 /**
  * Adds a listener to an existing template.
  * @param {string} name Existing template name
- * @param {{(response: string, content: HTMLElement) => void}} listener Function to invoke when a user response is given
+ * @param {MessasgeboxResponseCallback} listener Function to invoke when a user response is given
  */
 messagebox.addListener = function (name, listener) {
     if (typeof this.templates[name] === 'undefined')
